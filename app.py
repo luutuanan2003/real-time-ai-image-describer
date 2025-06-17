@@ -1,11 +1,17 @@
-import os, base64, json
+import boto3
+import json
+import base64
 from flask import Flask, request, jsonify
-from dotenv import load_dotenv
-from flask_cors import CORS  # ← ADD THIS
+from flask_cors import CORS
 import openai
 
-load_dotenv()
-openai.api_key = os.environ["OPENAI_API_KEY"]
+def get_openai_key():
+    client = boto3.client("secretsmanager", region_name="ap-southeast-2")
+    response = client.get_secret_value(SecretId="real-time-ai-describer/openai-key")
+    secret = json.loads(response["SecretString"])
+    return secret["OPENAI_API_KEY"]
+
+openai.api_key = get_openai_key()
 
 app = Flask(__name__)
 CORS(app)  # ← ENABLE CORS FOR ALL ROUTES
