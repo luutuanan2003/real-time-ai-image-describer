@@ -7,7 +7,7 @@ import openai
 
 def get_openai_key():
     client = boto3.client("secretsmanager", region_name="ap-southeast-2")
-    response = client.get_secret_value(SecretId="real-time-ai-describer/openai-key")
+    response = client.get_secret_value(SecretId="real-time-ai/openai")
     secret = json.loads(response["SecretString"])
     return secret["OPENAI_API_KEY"]
 
