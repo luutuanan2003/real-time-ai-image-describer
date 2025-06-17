@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Camera Describer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    #videoElement {
+      border: 4px solid #444;
+      border-radius: 10px;
+      width: 640px;
+      height: 480px;
+      object-fit: cover;
+      background: black;
+    }
+    #description {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #1f1f1f;
+      border-radius: 8px;
+      min-height: 60px;
+      width: 640px;
+    }
+    #startBtn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background: #0066ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 AI-Powered Live Image Describer</h1>
+  <video id="videoElement" autoplay muted></video>
+  <div id="description">Description will appear here every second...</div>
+  <button id="startBtn">Start Describing</button>
+
+  <script>
+    const video = document.getElementById("videoElement");
+    const descDiv = document.getElementById("description");
+    const startBtn = document.getElementById("startBtn");
+    let intervalId = null;
+
+    async function getDescription(imageBase64) {
+      try {
+        const res = await fetch("http://localhost:5000/describe-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_base64: imageBase64 })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          descDiv.textContent = data.description;
+        } else {
+          descDiv.textContent = "⚠️ " + (data.error || "Unknown error.");
+        }
+      } catch (err) {
+        descDiv.textContent = "❌ Failed to contact API.";
+      }
+    }
+
+    function captureFrame() {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0);
+      const dataURL = canvas.toDataURL("image/jpeg");
+      getDescription(dataURL);
+    }
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        intervalId = setInterval(captureFrame, 1000);
+      } catch (err) {
+        descDiv.textContent = "❌ Could not access camera.";
+      }
+    }
+
+    startBtn.addEventListener("click", () => {
+      if (!intervalId) {
+        startCamera();
+        startBtn.textContent = "Running...";
+        startBtn.disabled = true;
+      }
+    });
+  </script>
+</body>
+</html>
