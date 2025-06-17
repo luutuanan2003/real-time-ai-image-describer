@@ -1,10 +1,11 @@
 import boto3
 import json
-import base64
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import openai
+import os
 
+# AWS Secrets Manager
 def get_openai_key():
     client = boto3.client("secretsmanager", region_name="ap-southeast-2")
     response = client.get_secret_value(SecretId="real-time-ai/openai")
@@ -13,8 +14,14 @@ def get_openai_key():
 
 openai.api_key = get_openai_key()
 
-app = Flask(__name__)
-CORS(app)  # ← ENABLE CORS FOR ALL ROUTES
+# Serve static/index.html
+app = Flask(__name__, static_folder="static")
+CORS(app)
+
+
+@app.route('/')
+def serve_index():
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/describe-image', methods=['POST'])
@@ -36,12 +43,12 @@ def describe_image():
             ],
             max_tokens=100
         )
-        description = response.choices[0].message.content.strip()
+        description = response.choices[0].message.get("content", "").strip()
         return jsonify({"description": description})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 if __name__ == '__main__':
     app.run(debug=True)
-# force change # Add dummy comment
