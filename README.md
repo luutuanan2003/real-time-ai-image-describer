@@ -88,3 +88,58 @@ This allows the system to act as a real-time visual interpreter on the edge usin
 - [ ] Deploy to AWS ECS
 - [ ] Setup CI/CD with GitHub Actions
 - [ ] Write and deploy Raspberry Pi client
+
+
+## 🧪 Raspberry Pi Setup & Deployment Guide
+
+This project was successfully deployed and tested on a Raspberry Pi 5 with the following steps:
+
+### ✅ 1. Flash Raspberry Pi OS Lite (64-bit)
+- Use Raspberry Pi Imager
+- Set:
+  - Hostname: `pi-image-ai`
+  - Enable SSH
+  - Set username/password (e.g., `andyl`)
+  - Wi-Fi SSID: `TuanAn168` (2.4GHz only)
+  - Country: `VN` (to avoid 5GHz Wi-Fi issues)
+
+### ✅ 2. Boot and Connect
+- Insert SD card into Pi, power on
+- Find Pi’s IP with: `nmap -sn 192.168.1.0/24`
+- SSH in: `ssh andyl@192.168.1.123`
+
+### ✅ 3. Set Up Python Environment
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3-pip python3-venv python3-opencv libatlas-base-dev libjpeg-dev git -y
+git clone https://github.com/luutuanan2003/real-time-ai-image-describer.git
+cd real-time-ai-image-describer
+python3 -m venv venv
+source venv/bin/activate
+pip install --break-system-packages -r requirements.txt
+pip install --break-system-packages Pillow
+```
+
+### ✅ 4. Set OpenAI API Key
+```bash
+echo "OPENAI_API_KEY=sk-..." > .env
+```
+
+### ✅ 5. Run Backend & Client
+In one terminal:
+```bash
+cd ~/real-time-ai-image-describer
+source venv/bin/activate
+python app.py
+```
+
+In another terminal:
+```bash
+ssh andyl@192.168.1.123  # new session
+cd ~/real-time-ai-image-describer
+source venv/bin/activate
+python realtime_camera.py
+```
+
+> This setup enables the Raspberry Pi 5 to act as a real-time AI-powered visual interpreter using a USB webcam.
+
