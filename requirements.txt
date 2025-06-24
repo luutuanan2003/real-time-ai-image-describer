@@ -5,6 +5,7 @@ python-dotenv==1.1.0
 openai==1.23.2
 httpx==0.27.0
 gunicorn==21.2.0
+requests==2.31.0
 
 # AWS support (SecretsManager)
 boto3==1.34.85
@@ -16,3 +17,7 @@ numpy==1.26.4
 scipy==1.13.1
 joblib==1.5.1
 threadpoolctl==3.6.0
+
+# Computer Vision
+opencv-python==4.10.0.82
+Pillow==10.3.0
